@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-processing-service-config
+  labels:
+    app.kubernetes.io/name: processing-service
+    app.kubernetes.io/instance: {{ .Release.Name }}
+data:
+  PROCESSING_PORT: {{ .Values.env.PROCESSING_PORT | quote }}
+  PROCESSING_DISPATCH_INTERVAL_MS: {{ .Values.env.PROCESSING_DISPATCH_INTERVAL_MS | quote }}
+  PROCESSING_FRAME_INTERVAL_SECONDS: {{ .Values.env.PROCESSING_FRAME_INTERVAL_SECONDS | quote }}
+  PROCESSING_FFMPEG_TIMEOUT_SECONDS: {{ .Values.env.PROCESSING_FFMPEG_TIMEOUT_SECONDS | quote }}
+  MINIO_ENDPOINT: {{ .Values.env.MINIO_ENDPOINT | quote }}
+  MINIO_BUCKET: {{ .Values.env.MINIO_BUCKET | quote }}
+  MINIO_USE_SSL: {{ .Values.env.MINIO_USE_SSL | quote }}

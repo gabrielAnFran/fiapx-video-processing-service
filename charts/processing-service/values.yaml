@@ -1,0 +1,64 @@
+image:
+  # Each cmd/ binary is built as its own image tag via `docker build --build-arg TARGET=<cmd>`.
+  repository: ghcr.io/gabrielanfran/fiapx-video-processing-service
+  tags:
+    server: server-latest
+    dispatcher: outbox-dispatcher-latest
+    worker: worker-latest
+  pullPolicy: IfNotPresent
+
+server:
+  replicas: 1
+  port: 8082
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 256Mi
+
+dispatcher:
+  replicas: 1
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 250m
+      memory: 128Mi
+
+worker:
+  replicas: 1
+  # ffmpeg is CPU/memory-hungry relative to the other services' workers, so
+  # this gets noticeably more headroom than os-service's worker.
+  resources:
+    requests:
+      cpu: 500m
+      memory: 512Mi
+    limits:
+      cpu: "2"
+      memory: 1Gi
+
+hpa:
+  enabled: true
+  minReplicas: 1
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 75
+
+env:
+  PROCESSING_PORT: "8082"
+  PROCESSING_DISPATCH_INTERVAL_MS: "500"
+  PROCESSING_FRAME_INTERVAL_SECONDS: "1"
+  PROCESSING_FFMPEG_TIMEOUT_SECONDS: "600"
+  MINIO_ENDPOINT: "minio:9000"
+  MINIO_BUCKET: "fiapx-videos"
+  MINIO_USE_SSL: "false"
+
+secret:
+  # Not committed with real values; overridden via --set or a sealed secret /
+  # external secret operator in each environment.
+  dbDSN: "host=postgres user=postgres password=postgres dbname=processing_service port=5432 sslmode=disable"
+  amqpURL: "amqp://guest:guest@rabbitmq:5672/"
+  minioAccessKey: "minioadmin"
+  minioSecretKey: "minioadmin"
