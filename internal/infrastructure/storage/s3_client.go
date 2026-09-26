@@ -63,8 +63,8 @@ func (c *S3Client) Download(ctx context.Context, key string) (io.ReadCloser, err
 // Upload streams body to key using a multipart-safe uploader, suitable for
 // large zip archives.
 func (c *S3Client) Upload(ctx context.Context, key string, body io.Reader, contentType string) error {
-	uploader := manager.NewUploader(c.client)
-	_, err := uploader.Upload(ctx, &s3.PutObjectInput{
+	uploader := manager.NewUploader(c.client)          //nolint:staticcheck // feature/s3/transfermanager migration is a separate, larger change
+	_, err := uploader.Upload(ctx, &s3.PutObjectInput{ //nolint:staticcheck // same as above
 		Bucket:      aws.String(c.bucket),
 		Key:         aws.String(key),
 		Body:        body,

@@ -13,7 +13,7 @@ import (
 )
 
 func osWriteFile(path string) error {
-	return os.WriteFile(path, []byte("fake content for "+filepath.Base(path)), 0o644)
+	return os.WriteFile(path, []byte("fake content for "+filepath.Base(path)), 0o600)
 }
 
 func TestZipDirectory(t *testing.T) {
@@ -25,7 +25,7 @@ func TestZipDirectory(t *testing.T) {
 		"frame_00003.jpg": "content-3",
 	}
 	for name, content := range files {
-		require.NoError(t, os.WriteFile(filepath.Join(dir, name), []byte(content), 0o644))
+		require.NoError(t, os.WriteFile(filepath.Join(dir, name), []byte(content), 0o600))
 	}
 
 	destZip := filepath.Join(t.TempDir(), "frames.zip")

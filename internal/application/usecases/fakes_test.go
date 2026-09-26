@@ -133,5 +133,5 @@ func (f *fakeExtractor) ZipDirectory(_, destZipPath string) error {
 	if f.zipErr != nil {
 		return f.zipErr
 	}
-	return os.WriteFile(destZipPath, []byte("fake zip content"), 0o644)
+	return os.WriteFile(destZipPath, []byte("fake zip content"), 0o600)
 }
