@@ -44,3 +44,42 @@ func TestExtractFrames_RealFFmpeg(t *testing.T) {
 		t.Fatal("expected at least one extracted frame")
 	}
 }
+
+// TestAdapter_RealFFmpeg exercises ffmpeg.Adapter (ExtractFrames,
+// CountFrames, ZipDirectory), the thin wrapper the use case layer actually
+// depends on via the usecases.Extractor interface. The free functions it
+// delegates to are already covered by TestExtractFrames_RealFFmpeg and the
+// package's own unit tests; this test's job is only to prove the Adapter
+// wiring itself works end to end against the real ffmpeg binary.
+func TestAdapter_RealFFmpeg(t *testing.T) {
+	fixture := filepath.Join("..", "fixtures", "sample.mp4")
+	if _, err := os.Stat(fixture); os.IsNotExist(err) {
+		t.Skip("tests/fixtures/sample.mp4 not present yet, see tests/fixtures/README.md")
+	}
+
+	outDir := t.TempDir()
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	adapter := ffmpeg.NewAdapter()
+
+	if err := adapter.ExtractFrames(ctx, fixture, outDir, 1); err != nil {
+		t.Fatalf("Adapter.ExtractFrames failed: %v", err)
+	}
+
+	count, err := adapter.CountFrames(outDir)
+	if err != nil {
+		t.Fatalf("Adapter.CountFrames failed: %v", err)
+	}
+	if count == 0 {
+		t.Fatal("expected at least one extracted frame")
+	}
+
+	zipPath := filepath.Join(t.TempDir(), "frames.zip")
+	if err := adapter.ZipDirectory(outDir, zipPath); err != nil {
+		t.Fatalf("Adapter.ZipDirectory failed: %v", err)
+	}
+	if _, err := os.Stat(zipPath); err != nil {
+		t.Fatalf("expected zip file to exist: %v", err)
+	}
+}
